@@ -2,6 +2,14 @@ from miasm.arch.x86.arch import mn_x86
 from miasm.core.locationdb import LocationDB
 import random
 
+
+def rotate_right_32bit(value, shift):
+    shift %= 32  # Ensure the shift is within the 32-bit boundary
+    return (value >> shift) | (value << (32 - shift)) & 0xFFFFFFFF
+
+a = random.randint(0,0xffffffff)
+b = random.randint(0,0xffffffff)
+
 random.seed(b"0xTASOEURLASCENSEUR")
 result = []
 mn = [("add", True), ("sub", True), ("ror", False),
@@ -39,7 +47,10 @@ for _ in range(1000):
                 result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"{instruction[0]} {random.choice(registre[arch])}, {tmpreg}".upper(), loc_db, 64))))
                 result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"POP {registre[64][registre[arch].index(tmpreg)]}".upper(), loc_db, 64))))
     else:
-        r2 = (random.randint(0, arch))
+        if instruction[0] in ["shl", "shr"]:
+            r2 = (random.randint(0, arch//4))
+        else:
+            r2 = (random.randint(0, arch))
 
     instruction = f"{instruction[0]}  {r1}, {r2}"
     l = mn_x86.asm(mn_x86.fromstring(instruction.upper(), loc_db, 64))
