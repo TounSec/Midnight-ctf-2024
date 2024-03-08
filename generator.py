@@ -69,14 +69,14 @@ for _ in range(1000):
                         tmpreg = random.choice(registre[arch]) 
                         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"PUSH {registre[64][registre[arch].index(tmpreg)]}".upper(), loc_db, 64)))) 
                         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"CMP {random.choice(registre[8])} {random.randint(0, 2**8)}".upper(), loc_db, 64)))) 
-                        result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"{random.choice(cond)} {random.choice(registre[arch])}, {tmpreg}".upper(), loc_db, 64))))
+                        result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"{random.choice(cond)} {random.choice([e for e in registre[arch] if e != tmpreg])}, {tmpreg}".upper(), loc_db, 64))))
                         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"POP {registre[64][registre[arch].index(tmpreg)]}".upper(), loc_db, 64))))
 
                     else:
                         tmpreg = random.choice(registre[arch]) 
                         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"PUSH {registre[64][registre[arch].index(tmpreg)]}".upper(), loc_db, 64)))) 
                         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"MOV {tmpreg}, {random.randint(0, 2**arch)}".upper(), loc_db, 64)))) 
-                        result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"{instruction[0]} {random.choice(registre[arch])}, {tmpreg}".upper(), loc_db, 64))))
+                        result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"{instruction[0]} {random.choice([e for e in registre[arch] if e != tmpreg])}, {tmpreg}".upper(), loc_db, 64))))
                         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"POP {registre[64][registre[arch].index(tmpreg)]}".upper(), loc_db, 64))))
                     continue
         else:
