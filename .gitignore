@@ -21,3 +21,4 @@ Cargo.lock
 # les .objets et les sorties binaires
 *.o
 *.out
+packer
