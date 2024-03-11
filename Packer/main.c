@@ -3,7 +3,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <yvals.h>
+#include <zlib.h>
 
 void compress_img(const char *input_file, const char *output_file);
 void decompress_img(const char *compressed_img);
@@ -45,17 +45,22 @@ void compress_img(const char *input_file, const char *output_file)
     size_t bytes_read;
 
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), in) ) > 0) {
-        for (size_t i = 0; i < bytes_read; i++) {
-            buffer[i] /= 2;
+        uLong compressed_size = compressBound(bytes_read);
+        Bytef *compressed_data = malloc(compressed_size);
+
+        if (compress(compressed_data, &compressed_size, (const Bytef*)buffer, bytes_read) != Z_OK) {
+            perror("Compressions error");
+            return;
         }
         fwrite(buffer, 1, bytes_read, out);
+        free(compressed_data);
     }
     fclose(in);
     fclose(out);
 }
 
 // Fonction of decompress executable image
-void decompress_img(const char *compressed_img)
+void decompress_img_and_execute(const char *compressed_img)
 {
    FILE *in = fopen(compressed_img, "rb");
 
@@ -64,38 +69,46 @@ void decompress_img(const char *compressed_img)
         return;
     }
 
-    // Read the size of the original executable image
-    fseek(in, 0, SEEK_END);
-    long file_size = ftell(in);
-    fseek(in, 0, SEEK_SET);
-
-    // Allocate memory for executable image
-    void *executable_img = mmap(
-        NULL,
-        file_size,
-        PROT_READ   | PROT_WRITE    | PROT_EXEC,
-        MAP_PRIVATE | MAP_ANONYMOUS,
-        -1,
-        0
-    );
-
-    if (executable_img == MAP_FAILED) {
-        perror("Memory allocation error");
-        return;
-    }
 
     // Read and decompress executable image
     char buffer[1024];
     size_t bytes_read;
 
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), in)) > 0) {
-        for (size_t i = 0; i < bytes_read; i++) {
-            buffer[i] *= 2;
-        }
-        memcpy(executable_img, buffer, bytes_read);
-    }
-    fclose(in);
+        uLong uncompressed_size = bytes_read * 2;
+        Bytef *uncompressed_data = malloc(uncompressed_size);
 
+        if (uncompress(uncompressed_data, &uncompressed_size, (const Bytef*)buffer, bytes_read) != Z_OK) {
+            perror("Decompression error");
+            return;
+        }
+
+        void *executable_memory = mmap(
+            NULL,
+            uncompressed_size,
+            PROT_READ   | PROT_WRITE | PROT_EXEC,
+            MAP_PRIVATE | MAP_ANONYMOUS,
+            -1,
+            0
+        );
+
+        if (executable_memory == MAP_FAILED) {
+            perror("Memory allocation error");
+            return;
+        }
+        memcpy(executable_memory, uncompressed_data, uncompressed_size);
+
+        if (mprotect(executable_memory, uncompressed_size, PROT_READ | PROT_EXEC) == -1) {
+            perror("Error changing permissions");
+            return;
+        }
+    }
     // Execute image
     ((void (*)())executable_img)();
+
+    munmap(executable_memory, uncompressed_size);
+    free(uncompressed_data);
+
+    fclose(in);
+
 }
