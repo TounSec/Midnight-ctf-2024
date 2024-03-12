@@ -22,3 +22,4 @@ Cargo.lock
 *.o
 *.out
 Packer/packer
+.gdb_history
