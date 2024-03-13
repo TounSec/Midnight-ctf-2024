@@ -103,4 +103,5 @@ for element in registre[64][::-1]:
 
 result.append(b"\xc3")
 stringfinal = b"".join(result)
+# print(stringfinal)
 open("output.hex","wb").write(stringfinal.hex().encode())
