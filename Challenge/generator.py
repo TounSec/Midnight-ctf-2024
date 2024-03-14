@@ -1,7 +1,7 @@
 from miasm.arch.x86.arch import mn_x86
 from miasm.core.locationdb import LocationDB
 import random
-
+import shufflegen
 
 random.seed(b"0xTASOEURLASCENSEUR")
 result = []
@@ -30,7 +30,7 @@ for element in registre[64]:
     
         instruction = f"XOR {element}, rdi"
         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(instruction.upper(), loc_db, 64))))
-for _ in range(1000):
+for _ in range(40):
     i = random.randint(1,10)
     arch = random.choice([64, 32, 16, 8])
 
@@ -89,8 +89,8 @@ for _ in range(1000):
         l = mn_x86.asm(mn_x86.fromstring(instruction.upper(), loc_db, 64))
         choice = random.choice(l)
         result.append(choice)
-        print(choice)
-        print()
+        # print(choice)
+        # print()
 
 for element in registre[64]:
     if element != "rax":
@@ -101,7 +101,4 @@ for element in registre[64][::-1]:
     if element != "rdi" and element != "rax":
         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"POP {element.upper()}", loc_db, 64))))
 
-result.append(b"\xc3")
-stringfinal = b"".join(result)
-# print(stringfinal)
-open("output.hex","wb").write(stringfinal.hex().encode())
+print(result)
