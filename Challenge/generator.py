@@ -1,5 +1,6 @@
 from miasm.arch.x86.arch import mn_x86
 from miasm.core.locationdb import LocationDB
+from Crypto.Cipher.ARC4 import ARC4Cipher
 import random
 import shufflegen
 
@@ -30,7 +31,7 @@ for element in registre[64]:
     
         instruction = f"XOR {element}, rdi"
         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(instruction.upper(), loc_db, 64))))
-for _ in range(40):
+for _ in range(1000):
     i = random.randint(1,10)
     arch = random.choice([64, 32, 16, 8])
 
@@ -101,4 +102,14 @@ for element in registre[64][::-1]:
     if element != "rdi" and element != "rax":
         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"POP {element.upper()}", loc_db, 64))))
 
+for i in range(len(result)):
+    result[i] = len(result[i]).to_bytes(1,"little")+result[i]
 print(result)
+c = ARC4Cipher(b"\xe1\xa4\x64\x6e\xe8\xac\xd2\x0f\x45\x78\xdb\xea\x4a\x79\x38\x0a")
+
+print("{")
+for elm in result:
+    encrypted_part = c.encrypt(elm[1:])
+    encrypted_part_hex = ''.join(f'\\x{byte:02x}' for byte in encrypted_part)
+    print(f"\"\\x{elm[0]:02x}{encrypted_part_hex}\", ")
+print("}")
