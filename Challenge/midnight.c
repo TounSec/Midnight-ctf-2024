@@ -10,26 +10,7 @@
 
 uint8_t mysuperkey[16] = "\xe1\xa4\x64\x6e\xe8\xac\xd2\x0f\x45\x78\xdb\xea\x4a\x79\x38\x0a";
 
-uint8_t dechiffre_RC4(uint8_t *dat, uint8_t sz){
-    RC4_KEY key;
-    RC4_set_key(&key, 16, mysuperkey);
-    uint8_t *r = malloc(sz);
-    if(r == NULL){
-        return -1;
-    }
-    RC4(&key, sz, dat, r);
-    long pagesize = sysconf(_SC_PAGESIZE);
-    uintptr_t start = (uintptr_t)dat;
-    uintptr_t pagestart = start & -pagesize;
-    size_t padding = start - pagestart;
-    if (mprotect((void*)pagestart, sz + padding, PROT_READ | PROT_WRITE) == -1) {free(r);return -1;}
-    memcpy(dat, r, sz);
-    if(mprotect((void*)pagestart, sz + padding, PROT_READ)==-1){
-        return -1;
-    }
-    free(r);
-    return 0;
-}   
+
 void swap (int *a, int *b)
 {
     int temp = *a;
@@ -37,7 +18,7 @@ void swap (int *a, int *b)
     *b = temp;
 }
 
-uint8_t * ConvertArray2BytesString(uint8_t *arr[16]){
+uint8_t * ConvertArray2BytesString(uint8_t **arr){
     uint64_t n = 0;
     uint8_t **saveptr = arr;
     while (*arr++ != 0){n++;}
@@ -45,13 +26,13 @@ uint8_t * ConvertArray2BytesString(uint8_t *arr[16]){
     uint8_t *final = calloc(n, 1);
     uint8_t size = 0;
     size_t index = 0;
+    RC4_KEY key = {0};
+    
     for (size_t i = 0; i < n; i++)
     {
         size = arr[i][0];
-        final = realloc(final,index+size );
-        if(dechiffre_RC4(arr[i]+1, size) == -1){
-            exit(1);
-        }
+    	RC4_set_key(&key, 16, mysuperkey);
+   	RC4(&key, size, arr[i]+1, arr[i]+1);
         for (size_t k = 0; k < size; k++)
         {
             final[index] = arr[i][k+1];
@@ -87,8 +68,22 @@ uint8_t ** decrypt(uint8_t *arr[], int n){
     return a;
 }
 
-uint8_t *shuffled_arr[] = {"\x09\x41\x41\x41\x41\x41\x41\x41\x42\x42\x41\x41\x41\x41\xff","BBBBBBBBBBBBBBBB","\x09\x43\x43\x43\x43\x43\x43\x43\x43\x43\x43\x43\x43\x43\x43\x43", "DDDDDDDDDDDDDDDD", "EEEEEEEEEEEEEEEE", "FFFFFFFFFFFFFFFF"};
+uint8_t *shuffled_arr[] = {"\x10\x43\x71\x30\xe0\x6d\xf4\x19\x05\x09\x85\x58\xf4\xea\xc6\xca\xaa", "\x07\x41\x73\x32\xe2\x6f\xf6\x1b"};
 
+uint8_t **load_memory(){
+	unsigned long n = 0;
+	unsigned short taille = 0;
+	n = sizeof(shuffled_arr)/ sizeof(shuffled_arr[0]);
+    	
+	uint8_t **arr = calloc(n,sizeof(void *));
+
+	for(unsigned int i=0; i<n; i++){
+		taille = shuffled_arr[i][0]+1;
+		arr[i] = malloc(taille);
+		memcpy(arr[i], shuffled_arr[i], taille);
+	}
+	return arr;
+}
 
 int main(int argc, char **argv)
 {    
@@ -104,9 +99,11 @@ int main(int argc, char **argv)
 
     n = sizeof(shuffled_arr)/ sizeof(shuffled_arr[0]);
 
-    arr = calloc(n,sizeof(shuffled_arr[0]));
-    arr = decrypt(shuffled_arr,n);
-    code = ConvertArray2BytesString(arr);
 
+    arr = load_memory();
+    arr = decrypt(arr,n);
+    code = ConvertArray2BytesString(arr); 
+    
+    printf("::: %s\n", code);
     return 0;
 }
