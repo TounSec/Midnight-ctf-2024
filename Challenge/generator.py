@@ -4,13 +4,13 @@ from Crypto.Cipher.ARC4 import ARC4Cipher
 import random
 import shufflegen
 
-random.seed(b"0xTASOEURLASCENSEUR")
+random.seed(b"zefzfjiozejn")
 result = []
 # mn = [("add", True), ("sub", True), ("ror", False),
 #       ("rol", False), ("shr", False), ("shl", False), ("xor", True), ("or", True), ("xchg", True), ("and", True), ("imul", True)]
 mn = {
         1: ["dec", "inc", "bswap", "not", "mul"],
-        2: [("add", True), ("sub", True), ("ror", False),("rol", False), ("shr", False), ("shl", False), ("xor", True), ("or", True), ("xchg", True), ("and", True), ("imul", True)],
+        2: [("add", True), ("sub", True), ("ror", False),("rol", False), ("shr", False), ("shl", False), ("xor", True), ("or", True), ("xchg", True), ("imul", True)],
         }
 
 registre = {
@@ -31,7 +31,10 @@ for element in registre[64]:
     
         instruction = f"XOR {element}, rdi"
         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(instruction.upper(), loc_db, 64))))
-for _ in range(1000):
+        # instruction = f"XOR {element}, rsi"
+        # result.append(random.choice(mn_x86.asm(mn_x86.fromstring(instruction.upper(), loc_db, 64))))
+
+for _ in range(1500):
     i = random.randint(1,10)
     arch = random.choice([64, 32, 16, 8])
 
@@ -43,22 +46,13 @@ for _ in range(1000):
             r1 = random.choice(registre[random.choice([64, 32])])
 
         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"{instruction} {r1}".upper(), loc_db, 64))))
-    # elif i == 3:
-    #     choice = random.choice(registre[64])
-    #     # result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"PUSH {random.choice(registre[64])}".upper(), loc_db, 64)))) 
-    #     result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"vmovdqu MM0 {random.choice(registre[64])}".upper(), loc_db, 64)))) 
-    #     result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"MOVQ MM1 {random.choice(registre[64])}".upper(), loc_db, 64)))) 
-    #     result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"punpckhbw MM0 MM1".upper(), loc_db, 64)))) 
-    #     result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"MOVQ {random.choice(registre[64])}, XMM0".upper(), loc_db, 64)))) 
-    #     result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"EMMS".upper(), loc_db, 64)))) 
-
     else:
         
         instruction = random.choice(mn[2])
         r1 = random.choice(registre[arch])
 
         if instruction[1] == True:
-            r2 = random.choice(registre[arch])
+            r2 = random.choice([e for e in registre[arch] if e != r1])
             if instruction[0] in ["imul"]:
                 choice = random.choice([64,32,16])
                 r1 , r2 = random.choice(registre[choice]), random.choice(registre[choice])
@@ -82,7 +76,7 @@ for _ in range(1000):
                     continue
         else:
             if instruction[0] in ["shl", "shr"]:
-                r2 = (random.randint(0, arch//4))
+                r2 = (random.randint(0, arch//8))
             else:
                 r2 = (random.randint(0, arch))
 
@@ -102,14 +96,17 @@ for element in registre[64][::-1]:
     if element != "rdi" and element != "rax":
         result.append(random.choice(mn_x86.asm(mn_x86.fromstring(f"POP {element.upper()}", loc_db, 64))))
 
+result.append(b"\xc3")
+open("output.hexx", "wb").write(b"".join(result))
+# for e in result:
+#     print(e.hex())
+# exit(1)
 for i in range(len(result)):
     result[i] = len(result[i]).to_bytes(1,"little")+result[i]
-print(result)
-c = ARC4Cipher(b"\xe1\xa4\x64\x6e\xe8\xac\xd2\x0f\x45\x78\xdb\xea\x4a\x79\x38\x0a")
-
 print("{")
+c = ARC4Cipher(bytes.fromhex("e1a4646ee8acd20f4578dbea4a79380a"))
 for elm in result:
     encrypted_part = c.encrypt(elm[1:])
     encrypted_part_hex = ''.join(f'\\x{byte:02x}' for byte in encrypted_part)
-    print(f"\"\\x{elm[0]:02x}{encrypted_part_hex}\", ")
+    print(f"\"\\x{elm[0]:02x}{encrypted_part_hex}\", ", end ="")
 print("}")
