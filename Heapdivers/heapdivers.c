@@ -1,3 +1,5 @@
+// gcc heapdivers.c -o heapdivers -no-pie
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +8,7 @@
 
 #define FLAG_BUFFER 200
 
-void bile_titan();
+void plant_the_flag();
 void puts_menu();
 void input_case();
 
