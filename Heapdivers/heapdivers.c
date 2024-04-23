@@ -1,16 +1,13 @@
-// gcc heapdivers.c -o heapdivers -no-pie
+// gcc heapdivers.c -o heapdivers -no-pie -fstack-protector-all
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #define FLAG_BUFFER 200
-
-void plant_the_flag();
-void puts_menu();
-void input_case();
 
 typedef struct {
     uintptr_t (*stratagem)();
@@ -20,6 +17,17 @@ typedef struct {
 char choice = '\0';
 action *helldivers;
 
+void plant_the_flag();
+void puts_menu();
+void input_case();
+void call_stragem(action *call);
+char *information_reception();
+void eagle();
+void orbital();
+void autocannon();
+void earth();
+void quasar();
+
 int main()
 {
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -27,6 +35,9 @@ int main()
     helldivers = (action*)malloc(sizeof(helldivers)); 
     puts_menu();
     input_case();
+    call_stragem(helldivers);
+
+    return 0;
 }
 
 void plant_the_flag()
@@ -54,7 +65,7 @@ void puts_menu()
 
 void input_case()
 {
-    scanf("%c", &choice);
+    scanf(" %c", &choice);
 
     if (!isupper(choice)) {
         choice = toupper(choice); 
@@ -62,6 +73,10 @@ void input_case()
 
     switch (choice) {
         case 'E':
+            helldivers->stratagem = (void*)eagle;
+            puts("Wait helldivers, we need to confirm your identity !");
+            puts("Please announce your code name");
+            helldivers->helldivers_name = information_reception(); 
             break;
 
         case 'O':
@@ -74,6 +89,7 @@ void input_case()
             break;
 
         case 'L':
+            quasar();
             break;
 
         case 'F':
@@ -85,3 +101,65 @@ void input_case()
     }
 }
 
+void call_stragem(action *call)
+{
+    (*call->stratagem)();
+}
+
+char *information_reception()
+{
+    char *line = malloc(100);
+    if (line == NULL) {
+        return NULL;
+    }
+
+    size_t max = 100, len = 0;
+    int c;
+
+    while ((c = fgetc(stdin)) != EOF) {
+        if (len+1 >= max) {
+            max *= 2;
+
+            char *linen = realloc(line, max);
+            if (linen == NULL) {
+                free(line);
+                return NULL;
+            }
+            line = linen;
+        }
+        line[len++] = c;
+        if (c == '\n') {
+            break;
+        }
+    }
+    line[len] = '\0';
+    return line;
+}
+
+void eagle()
+{
+    puts("(E)agle 500kg Bomb is coming. Step aside !");
+}
+
+void orbital()
+{
+
+}
+
+void autocannon()
+{
+
+}
+
+void earth()
+{
+
+}
+
+void quasar()
+{
+    puts("You overloaded your cannon, its going to explode. Flee !!!");
+    puts("A world for the end ?");
+    char *last_world = (char*)malloc(8);
+    read(0, last_world, 8);
+}
