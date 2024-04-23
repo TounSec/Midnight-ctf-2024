@@ -24,15 +24,15 @@ void call_stragem(action *call);
 char *information_reception();
 void eagle();
 void orbital();
-void autocannon();
+void extraction();
 void earth();
 void quasar();
 
 int main()
 {
     setvbuf(stdout, NULL, _IONBF, 0);
+    helldivers = (action*)malloc(sizeof(helldivers));
 
-    helldivers = (action*)malloc(sizeof(helldivers)); 
     puts_menu();
     input_case();
     call_stragem(helldivers);
@@ -44,6 +44,7 @@ void plant_the_flag()
 {
     char buf[FLAG_BUFFER];
     FILE *f = fopen("flag.txt", "r");
+
     fgets(buf, FLAG_BUFFER, f);
     fprintf(stdout, "%s\n", buf);
     fflush(stdout);
@@ -55,12 +56,12 @@ void puts_menu()
     puts("FOR DEMOCRACY !!");
     puts("Select your stratagem");
     puts("---------------------");
-    puts("(E)agle 500kg Bomb");
-    puts("(O)rbital Railcannon Strike");
-    puts("(A)/AC-8 Autocannon Sentry");
-    puts("(S)uper Earth Flag");
-    puts("(L)AS-99 Quasar Cannon");
-    puts("(F)lee");
+    puts("[E]agle 500kg Bomb");
+    puts("[O]rbital Railcannon Strike");
+    puts("E[x]traction");
+    puts("[S]uper Earth Flag");
+    puts("[L]AS-99 Quasar Cannon");
+    puts("[F]lee");
 }
 
 void input_case()
@@ -80,9 +81,11 @@ void input_case()
             break;
 
         case 'O':
+            helldivers->stratagem = (void*)orbital;
             break;
 
-        case 'A':
+        case 'X':
+            helldivers->stratagem = (void*)extraction;
             break;
         
         case 'S':
@@ -109,12 +112,12 @@ void call_stragem(action *call)
 char *information_reception()
 {
     char *line = malloc(100);
+    size_t max = 100, len = 0;
+    int c;
+
     if (line == NULL) {
         return NULL;
     }
-
-    size_t max = 100, len = 0;
-    int c;
 
     while ((c = fgetc(stdin)) != EOF) {
         if (len+1 >= max) {
@@ -143,12 +146,23 @@ void eagle()
 
 void orbital()
 {
-
+    puts("Okay helldivers, we sent a Orbital Railcannon Strike. Take care");
 }
 
-void autocannon()
+void extraction()
 {
+    char authorisation = '\0';
 
+    puts("Do you really want to extract helldivers ?[Y/N]"); 
+    scanf(" %c", &authorisation);
+
+    if (toupper(authorisation) == 'Y') {
+        puts("The Falcon is coming to extract you !");
+        free(helldivers);
+
+    } else {
+        puts("Heard helldivers, continue the mission");
+    }
 }
 
 void earth()
@@ -158,8 +172,9 @@ void earth()
 
 void quasar()
 {
+    char *last_world = (char*)malloc(8);
+
     puts("You overloaded your cannon, its going to explode. Flee !!!");
     puts("A world for the end ?");
-    char *last_world = (char*)malloc(8);
     read(0, last_world, 8);
 }
