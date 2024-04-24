@@ -1,9 +1,8 @@
-// gcc heapdivers.c -o heapdivers -no-pie -fstack-protector-all
+// gcc heapdivers.c -o heapdivers -no-pie -fstack-protector-all -m32
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 #include <unistd.h>
 
@@ -120,6 +119,7 @@ void call_stragem(action *call)
 
 char *information_reception()
 {
+    getchar();
     char *line = malloc(100);
     size_t max = 100, len = 0;
     int c;
@@ -183,9 +183,9 @@ void earth()
 
 void quasar()
 {
-    char *last_world = (char*)malloc(8);
+    char *last_word = (char*)malloc(8);
 
     puts("You overloaded your cannon, its going to explode. Flee !!!");
     puts("A world for the end ?");
-    read(0, last_world, 8);
+    read(0, last_word, 8);
 }
