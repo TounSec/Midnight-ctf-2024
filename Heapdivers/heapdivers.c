@@ -33,10 +33,11 @@ int main()
     setvbuf(stdout, NULL, _IONBF, 0);
     helldivers = (action*)malloc(sizeof(helldivers));
 
-    puts_menu();
-    input_case();
-    call_stragem(helldivers);
-
+    while (1) {
+        puts_menu();
+        input_case();
+        call_stragem(helldivers); 
+    }
     return 0;
 }
 
@@ -102,10 +103,12 @@ void input_case()
             break;
 
         case 'F':
+            free(helldivers);
             exit(0);
 
         default:
             puts("[Error] You can't choose another stratagem !");
+            free(helldivers);
             exit(1);
     }
 }
@@ -174,7 +177,8 @@ void extraction()
 
 void earth()
 {
-
+    printf("Wow, Is this a memory leak ? %p\n ", plant_the_flag);
+    puts("Well done helldivers, continue to spread democracy for the privilege of having the 'Super Private' title");
 }
 
 void quasar()
