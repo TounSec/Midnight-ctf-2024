@@ -89,6 +89,12 @@ void input_case()
             break;
         
         case 'S':
+            if (helldivers) {
+                helldivers->stratagem = (void*)earth;
+
+            } else {
+                puts("Identity not recognized");
+            }
             break;
 
         case 'L':
@@ -124,6 +130,7 @@ char *information_reception()
             max *= 2;
 
             char *linen = realloc(line, max);
+
             if (linen == NULL) {
                 free(line);
                 return NULL;
