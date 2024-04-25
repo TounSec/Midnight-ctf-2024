@@ -186,6 +186,6 @@ void quasar()
     char *last_word = (char*)malloc(8);
 
     puts("You overloaded your cannon, its going to explode. Flee !!!");
-    puts("A world for the end ?");
+    puts("A word for the end ?");
     read(0, last_word, 8);
 }
